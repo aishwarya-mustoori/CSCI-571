@@ -1,0 +1,156 @@
+ul {
+  	list-style-type: none;
+  	overflow: hidden;
+  	margin-top: 0;
+  	margin-bottom: 0;
+  	padding-top: 0;
+  	padding-bottom: 16px;
+	line-height: 25px;
+
+}
+
+div.head{
+  	text-align: center;
+	font-size: 47px;
+	padding-top: 20px;
+	margin: 0px;
+	font-style: bold;
+	font-family: Georgia;
+	color : #383838	;
+	margin-top: 25px;
+  	margin-bottom: 0;
+  	padding-top: 0;
+  	padding-bottom: 3px;
+	line-height: 25px;
+
+}
+div.wrapper{
+	margin:auto;
+    	width:690px;
+    	float: center;
+}
+div.main{
+	border: solid black 1px;
+	width: 600px;
+	max-height : 100px;
+  	float: center;
+	margin-right: auto;
+	margin-left : auto ;
+	padding-bottom : 0px;
+	margin-top : 8px;
+	margin-bottom : 0px;
+
+}
+div.menu{
+	width : 600px;
+  	text-align: center;
+	float : center;
+	padding-top : 10px;
+	padding-left :80px;
+	padding-right : auto;
+	margin : auto;
+}
+
+li {
+
+  	float: left;
+  	text-align: center;
+
+
+}
+
+li a.normal {
+  	display: block;
+  	color: #696969	;
+  	text-align: center;
+  	padding-right: 17px;
+  	text-decoration: none;
+	font-style: italic;
+	font-size : 11px;
+	font-family: Georgia;
+}
+li a.homeFont{
+	display: block;
+	color: black;
+  	text-align: center;
+  	padding-right: 17px;
+  	text-decoration: none;
+	font-style: italic;
+	font-size :11px;
+	font-family: Georgia;
+}
+
+table.home {
+  	padding-top : 70px;
+	display :flex;
+	justify-content : center;
+
+}
+table.nature {
+  	padding-top : 40px;
+	display :flex;
+	justify-content : center;
+}
+td{
+ 	padding-left : 5px;
+ 	margin : 0px;
+
+}
+
+td.naturetable{
+ 	overflow: auto;
+	float: center;
+	font-size : 26px;
+	margin:0px; 
+	color : #383838	;
+	padding-bottom : 3px;
+
+
+}
+
+
+img.image {
+  	width: 340px;
+  	height: 340px;
+  	object-fit: cover;
+	padding:0px; 
+	border-width:0px; 
+	margin:0px; 
+	
+
+}
+p.copy{
+	font-size : 8px;
+	color : #545454;
+	font-family: Georgia;
+	font-style : italic;
+
+}
+
+
+footer {
+	float : bottom;
+}
+img.social {
+	margin-top : 10px;
+	margin-bottom : 12px;
+	margin-right : 10px;
+	width : 15px;
+	height : 15px;
+}
+div.social1{
+	margin-left : 12px;
+}
+
+li a.disabled {
+	pointer-events : none;
+   	cursor: default;
+  	display: block;
+  	color: #808080;
+  	text-align: center;
+  	padding-right: 17px;
+  	text-decoration: none;
+	font-style: italic;
+	font-size :11px;
+	font-family: Georgia;
+}

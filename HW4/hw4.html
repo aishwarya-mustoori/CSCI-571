@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<head>
+    <meta charset = "utf-8"/>
+    <title>Homework 4 </title>
+</head>
+<body>
+    <script>
+        var jsonObj;
+        function viewJSON(form) {
+            url = form.URL.value;
+            if (url.length == 0) {
+                alert("Please Enter the Input!");
+                return;
+            }
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET",url,false);
+            xmlhttp.overrideMimeType('application/json');
+            try {
+                xmlhttp.send();
+            } catch(err) {
+                alert("JSON File Not Found!");
+                return;
+            }
+            
+            if(xmlhttp.status==200 && xmlhttp.readyState == 4  ){
+                try {
+                    if( xmlhttp.responseText == 0 ){
+                        window.alert("JSON File is Empty");
+                        return;
+                    }
+                    jsonObj = JSON.parse(xmlhttp.responseText);
+                } catch(err) {
+                    window.alert("JSON File is invalid");
+                    return;
+                }
+            } else if(xmlhttp.status==404){
+                window.alert("JSON File Not Error!");
+                return;
+            } else {
+                window.alert("Except caught with error : " + xmlhttp.status);
+                return;
+            }
+            //JSON Object does not exist
+            if (jsonObj == null) {
+                window.alert("The JSON File is Empty!");
+                return;
+            }
+            //JSON Object contains no Buildings or Row is null
+            if (!jsonObj.Mainline.Table.hasOwnProperty("Row") || (jsonObj.Mainline.Table.hasOwnProperty("Row")  && jsonObj.Mainline.Table.Row ==null)) {
+                window.alert("JSON File does not contain any buildings!");
+                return;
+            }
+            // Empty JSON File
+            if (Object.keys(jsonObj).length === 0) {
+                window.alert(" JSON File is Empty!");
+                return;
+            }
+            // JSON Contains Row but Row should not be empty
+            if( jsonObj.Mainline.Table.Row.length == 0) {
+                window.alert("JSON File does not contain any buildings!");
+                return;
+            }
+            htmlText = generateHTML(jsonObj);
+            newWindow = window.open("", "Homework 4", "height=650, width=1000");
+            newWindow.document.write(htmlText)
+            newWindow.document.close()
+        }
+    
+    function generateHTML(json) {
+        htmlText = "<!DOCTYPE html><title>Largest Manufacterers by Production(2017)</title></head><body>";
+        
+        htmlText += "<table border=1><tbody>";
+        // Parse the header
+        htmlText += "<tr>";
+        var header_data ;
+        header_data =json.Mainline.Table.Header.Data
+        for (var headerText of header_data ) {
+            htmlText += "<th>";
+            htmlText += headerText;
+            htmlText += "</th>";
+        }
+        // Parse the table elements
+        htmlText += "</tr>";
+        var buildings;
+        buildings = json.Mainline.Table.Row;
+        
+        for(var buildingsNode of buildings)
+        {
+            htmlText+="<tr>";
+            var buildings_keys = Object.keys(buildingsNode);
+            for(var j in buildings_keys)
+            {
+                property = buildings_keys[j];
+                if(buildings_keys[j]=="Logo")
+                {
+                    if( buildingsNode[property]  != null && buildingsNode[property]  != '')
+                    htmlText += "<td ><img src='" + buildingsNode[property] + "' style='display:block;' width='155.6px' height='155.6px'></td>";
+                    else if ( buildingsNode[property]  =='' || buildingsNode[property]  == null)
+                    htmlText += "<td ></td>";
+                    
+                }
+                else if( buildings_keys[j]=="HomePage" ) {
+                    if( buildingsNode[property]  != null && buildingsNode[property]  != '')
+                    htmlText += "<td><a href='" + buildingsNode[property] + "'>" + buildingsNode[property] + "</a></td>";
+                    else
+                    htmlText += "<td ></td>";
+                    
+                }
+                else if ( buildings_keys[j]=="Hubs"){
+                    var hubs1 = buildingsNode[property];
+                    var hub =hubs1["Hub"];
+                    if (hub.length == 0) {
+                        htmlText += "<td></td>";
+                    }
+                    else{
+                        var hubsText = "<td><ul>";
+                        for(i=0;i<hub.length;i++)  {
+                            if ( i == 0 ) {
+                                if( hub[i] != null && hub[i] != '')
+                                hubsText += "<li><b>"+ hub[i] + "</b></li>" ;
+                                else
+                                hubsText += "<li><b>"+"" + "</b></li>" ;
+                                
+                            }
+                            else {
+                                if( hub[i] != null && hub[i] != '' )
+                                hubsText += "<li>"+ hub[i] + "</li>" ;
+                                else
+                                hubsText += "<li>"+"" + "</li>" ;
+                            }
+                        }
+                        hubsText += "</ul></td>";
+                        htmlText += hubsText;}
+                }
+                else {
+                    if(buildingsNode[property] != null &&  buildingsNode[property]  !='' )
+                    htmlText += "<td>"+ buildingsNode[property] + "</td>";
+                    else
+                    htmlText += "<td>"+ ""+ "</td>";
+                    
+                }
+            }
+            htmlText += "</tr>"
+        }
+        htmlText += "</tbody></table>"
+        htmlText += "</bo"+"dy>"+"</ht"+"ml>"
+        return htmlText;
+    }
+    </script>
+    <center>
+        <br>
+        <br>
+        <h5>Enter the URL for list of tallest buildings JSON File </h5>
+        <form name="myform" method="POST" id="location">
+            <input type="text" name="URL" size="15" align = "center" />
+            <br>
+            <br>
+            <input type="button" name="submit" value="Submit Query"
+            onClick="viewJSON(this.form)"  style = "border-radius: 4px;" />
+        </form>
+    </center>
+</body>
+</html>

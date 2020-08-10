@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<head>
+    <style>
+        div.mainButton {
+            float : left;
+            margin-left : 200px;
+            width : 150px;
+            position: fixed;
+            height : 100%;
+        }
+    #search1{
+        border: solid grey 1px;
+        font-size :20px;
+        padding : 10px;
+        background-color : #F5F5F5;
+        text-align :center;
+        
+    }
+    .material-icons.md-18 {
+        font-size: 18px;
+        color: indigo; }
+    #GoogleNews1{
+        border: solid grey 1px;
+        font-size :20px;
+        padding : 10px;
+        background-color : #696969;
+        text-align :center;
+        color : white;
+        
+    }
+    #search1:hover,#GoogleNews1:hover {
+        background-color: #00b100 ;
+        color : white;
+    }
+    #searchForm1 {
+        display: none;
+        padding : 15px;
+        display: inline-block;
+        background-color : #F5F5F5;
+    }
+    input.submit:hover,input.clear1:hover{
+        background-color: #00b100 ;
+        color : white;
+        
+    }
+    .submit,.clear1{
+        margin-right : 15px;
+        border:none;
+        font-size: 14px;
+        outline: none;
+        width : 80px;
+        height : 32px;
+        
+    }
+    .main{
+        display : flex;
+        flex-direction: row-reverse;
+        float : left;
+        position:absolute;
+        text-align : center;
+        margin-left : 400px;
+    }
+    .main1{
+        display :flex;
+    }
+    </style>
+    <title> Homework 6 </title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <script src="https://d3js.org/d3.v4.js"></script>
+        
+        <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+        <script>
+            var myIndex = 0;
+            var pageIndex = 0;
+            var visibleFormIndex = 0;
+            var json1=[];
+            var jsonObj=[];
+            function visibleForm(i,j,k) {
+                document.getElementById(i).style.display='block';
+                document.getElementById(i).style.width='700px';
+                document.getElementById(k).style.backgroundColor= "#696969";
+                document.getElementById(j).style.backgroundColor= "#F5F5F5";
+                document.getElementById('search1').style.color = 'white';
+                document.getElementById('GoogleNews1').style.color = 'black';
+                <!--            document.getElementById('keyword').focus();-->
+                
+                date = new Date();
+                var yesterday = date - 1000 * 60 * 60 * 24 * 7;
+                var dd=date.getDate();
+                var mm=date.getMonth()+1;
+                var yy=date.getFullYear();
+                var newdate= mm+"/"+dd+"/"+yy;
+                yesterday = new Date(yesterday);
+                if(visibleFormIndex == 0)
+                {
+                    document.getElementById("from").valueAsDate =new Date(yesterday);
+                }
+                if( visibleFormIndex == 0 )
+                {
+                    document.getElementById("to").valueAsDate =new Date(newdate);
+                }
+                document.getElementById("keyword").focus();
+                document.getElementById(k).removeEventListener("mouseout", removeColor1);
+                document.getElementById(k).addEventListener("mouseout", myColor3);
+                
+                document.getElementById(j).addEventListener("mouseover", myColor);
+                document.getElementById(k).addEventListener("mouseover", myColor1);
+                
+                document.getElementById(j).addEventListener("mouseout", removeColor);
+                document.getElementById("topHeadlines").style.display ="none";
+                document.getElementById("CNN").style.display ="none";
+                document.getElementById("Fox").style.display ="none";
+                document.getElementById("wordCloud").style.display ="none";
+                document.getElementById("results").style.display ="block";
+                if( pageIndex > 5){
+                    document.getElementById('buttons').style.display = "block";
+                }
+                
+                document.documentElement.scrollTop = 0;
+                if( visibleFormIndex == 0 )
+                getSources();
+                visibleFormIndex ++;
+                
+            }
+        function removeColor(){
+            document.getElementById('GoogleNews1').style.backgroundColor = "#F5F5F5";
+            document.getElementById('GoogleNews1').style.color = "black";
+            
+        }
+        function myColor(){
+            document.getElementById('GoogleNews1').style.backgroundColor = "#00b100";
+            document.getElementById('GoogleNews1').style.color = "white";
+            
+        }
+        function removeColor1(){
+            document.getElementById('search1').style.backgroundColor = "#F5F5F5";
+            document.getElementById('search1').style.color = "black";
+            
+        }
+        function myColor1(){
+            document.getElementById('search1').style.backgroundColor = "#00b100";
+            document.getElementById('search1').style.color = "white";
+            
+        }
+        
+        function myColor3(){
+            document.getElementById('search1').style.backgroundColor = "#696969";
+        }
+        function myColor2(){
+            document.getElementById('GoogleNews1').style.backgroundColor = "#696969";
+        }
+        function disableForm(i,j,k) {
+            document.getElementById(i).style.display ="none";
+            document.getElementById(k).style.backgroundColor= "#F5F5F5" ;
+            document.getElementById(j).style.backgroundColor=
+            "#696969";
+            document.getElementById('GoogleNews1').style.color = "white";
+            document.getElementById('search1').style.color = "black";
+            
+            
+            document.getElementById(j).removeEventListener("mouseout", removeColor);
+            document.getElementById(j).addEventListener("mouseout", myColor2);
+            document.getElementById(j).addEventListener("mouseover", myColor);
+            
+            document.documentElement.scrollTop = 0;
+            document.getElementById(k).addEventListener("mouseover", myColor1);
+            document.getElementById(k).addEventListener("mouseout", removeColor1);
+            document.getElementById("topHeadlines").style.display ="block";
+            document.getElementById("CNN").style.display ="block";
+            document.getElementById("Fox").style.display ="block";
+            document.getElementById("wordCloud").style.display ="block";
+            document.getElementById("results").style.display ="none";
+            document.getElementById('buttons').style.display = "none";
+            
+        }
+        function keyword1() {
+            document.getElementById('keyword').style.border = "none"
+        }
+        
+        window.onload = function checkJSON(){
+            
+            var xmlhttp = new XMLHttpRequest();
+            
+            xmlhttp.open("GET",'getTopHeadlines',true);
+            try {
+                xmlhttp.addEventListener('load', topHeadlines, false);
+                xmlhttp.send(null);
+            } catch(err) {
+                alert("JSON File Not Found!");
+            }
+            var xmlhttp1 = new XMLHttpRequest();
+            
+            xmlhttp1.open("GET",'getWordsList',true);
+            try {
+                xmlhttp1.addEventListener('load', wordCloud, false);
+                xmlhttp1.send(null);
+            } catch(err) {
+                alert("JSON File Not Found!");
+            }
+            var xmlhttp2 = new XMLHttpRequest();
+            
+            xmlhttp2.open("GET",'getCNNData',true);
+            try {
+                xmlhttp2.addEventListener('load', getCNN, false);
+                xmlhttp2.send(null);
+            } catch(err) {
+                alert("JSON File Not Found!");
+            }
+            var xmlhttp3 = new XMLHttpRequest();
+            
+            xmlhttp3.open("GET",'getFoxNews',true);
+            try {
+                xmlhttp3.addEventListener('load', getFox, false);
+                xmlhttp3.send(null);
+            } catch(err) {
+                alert("JSON File Not Found!");
+            }
+            
+            
+        }
+        function topHeadlines(e) {
+            try{
+                if( this.responseText.length != 0){
+                    var topHeadlines = JSON.parse(this.responseText);
+                    createSlideShow(topHeadlines)
+                }
+                
+            }catch(e){
+                window.alert('Invalid JSON')
+            }
+            
+        }
+        function wordCloud(e) {
+            try{
+                if( this.responseText.length != 0){
+                    var draw = JSON.parse(this.responseText);
+                    freq_draw(draw);
+                }
+                
+            }catch(e){
+                window.alert('Invalid JSON')
+            }
+        }
+        function getCNN(e) {
+            try{
+                if( this.responseText.length != 0){
+                    var CNN = JSON.parse(this.responseText);
+                    generateNews(CNN,'CNN');
+                }
+                
+            }catch(e){
+                window.alert('Invalid JSON')
+            }
+            
+            
+        }
+        function getFox(e) {
+            try{
+                if( this.responseText.length != 0){
+                    var fox = JSON.parse(this.responseText);
+                    generateNews(fox,'Fox');
+                }
+                
+            }catch(e){
+                window.alert('Invalid JSON')
+            }
+            
+        }
+        function generateNews(json,id) {
+            var i =0;
+            
+            var cards = document.createElement("div");
+            var mainId = document.createElement("div");
+            mainId.style.fontSize = "25px";
+            mainId.style.fontWeight = "bold";
+            mainId.style.textAlign = "center";
+            if( id== 'Fox')
+            mainId.innerHTML = "Fox News<hr>";
+            else {
+                mainId.innerHTML = "CNN<hr>";
+            }
+            document.getElementById(id).appendChild(mainId);
+            
+            for (article of json ){
+                if(i<4){
+                    var link = document.createElement("a");
+                    link.setAttribute("href",article['url']);
+                    
+                    var card = document.createElement("div");
+                    card.style.borderRadius = "5px";
+                    
+                    var image = document.createElement("img");
+                    image.setAttribute("src",article['urlToImage']);
+                    image.style.width = "210px";
+                    image.style.height = "210px";
+                    card.appendChild(image);
+                    var data = document.createElement("div");
+                    image.style.width = "210px";
+                    data.innerHTML ="<b><h4>"+article['title'] +
+                    "</b></h4>";
+                    
+                    var data2 = document.createElement("down");
+                    data2.style.fontSize = "12px";
+                    data2.innerHTML = article['description'];
+                    
+                    card.appendChild(data);
+                    card.appendChild(data2);
+                    
+                    card.style.width = "210px";
+                    card.style.height = "100%";
+                    
+                    card.style.marginRight = "8px";
+                    card.style.paddingBottom = "10px";
+                    card.style.border = "solid thin darkgray";
+                    card.style.backgroundColor = "whitesmoke";
+                    
+                    link.appendChild(card);
+                    link.style.textDecoration = "none";
+                    link.style.color = 'black';
+                    link.setAttribute("target","_blank");
+                    
+                    cards.appendChild(link);
+                    
+                    i++;
+                }
+                
+                
+                else {
+                    break;
+                }
+            }
+            cards.style.display = "flex";
+            cards.style.flex = "0 0 25em";
+            document.getElementById(id).appendChild(cards);
+            document.getElementById(id).style.display = "block";
+            
+        }
+        function hover(card) {
+            this.style.boxShadow = "0 16px 32px 0 "+ 'rgba('+ 0 + ',' + 0 + ',' + 0 +','+0.2+ ')';
+        }
+        function over(card) {
+            this.style.border = "solid thin darkgray";
+            this.style.boxShadow = "none";
+        }
+        function createSlideShow(json) {
+            var i=0;
+            mainIndex = myIndex;
+            for (article of json ){
+                if(i<5){
+                    var image = document.createElement("IMG");
+                    var slideShow = document.createElement("div");
+                    if(mainIndex == i) {
+                        image.setAttribute("src",article['urlToImage'] );
+                        image.style.width = '500px';
+                        image.style.height = '280px';
+                        
+                        
+                        var title =document.createElement("div");
+                        title.style.color = '#f1f1f1';
+                        title.innerHTML ="<b><h4>"+article['title'] +
+                        "</b></h4><h5>"+ article['description']+"</h5>";
+                        title.setAttribute("value",article['title'] );
+                        title.style.width ='480px';
+                        title.style.bottom = '0';
+                        title.style.position = 'absolute';
+                        title.style.backgroundColor = 'rgba('+ 0 + ',' + 0 + ',' + 0 +','+0.2+ ')';
+                        title.style.padding = '10px';
+                        title.style.textAlign = 'center';
+                        
+                        
+                        slideShow.style.position = 'relative';
+                        slideShow.style.width ="480px";
+                        slideShow.appendChild(image);
+                        slideShow.appendChild(title);
+                        
+                        var link = document.createElement("a");
+                        link.setAttribute("href",article['url']);
+                        link.setAttribute("target","_blank");
+                        link.appendChild(slideShow);
+                        
+                        document.getElementById("topHeadlines").innerHTML ="";
+                        document.getElementById("topHeadlines").appendChild(link);
+                        
+                        break;
+                    }
+                    i++;
+                }
+                else {
+                    break;
+                }
+            }
+            myIndex = myIndex +1;
+            if (myIndex>4)
+            {
+                myIndex = 0;
+            }
+            setTimeout(createSlideShow, 2000,json);
+        }
+        
+        function freq_draw(myWords){
+            margin = {top: 10, right: 10, bottom: 10, left: 10},
+            width = 350 - margin.left - margin.right,
+            height = 280 - margin.top - margin.bottom;
+            
+            svg = d3.select("#wordCloud").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+                  
+                  layout = d3.layout.cloud()
+                  .size([width, height])
+                  .words(myWords.map(function(d) { return {text: d.text, size:d.size}; }))
+                  .padding(8)
+                  .rotate(function() { return ~~(Math.random() * 2) * 90; })
+                  .fontSize(function(d) { return d.size*10 + 3; })
+                  .on("end", draw);
+                  layout.start();
+        }
+        
+        
+        function draw(words) {
+            svg
+            .append("g")
+            .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+            .selectAll("text")
+            .data(words)
+            .enter().append("text")
+            .style("font-size", function(d) { return d.size+ "px"; })
+            .style("fill", "black")
+            .attr("text-anchor", "middle")
+            .style("font-family", "Impact")
+            .attr("transform", function(d) {
+                  return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                  })
+                  .text(function(d) { return d.text; });
+        }
+        function getSources(){
+            var category = document.getElementById("category").value;
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET",'/getSources?category='+category,true);
+            try {
+                xmlhttp.addEventListener('load', getAllSources, false);
+                xmlhttp.send(null);
+            } catch(err) {
+                alert("JSON File Not Found!");
+            }
+        }
+        function getAllSources (e){
+            var json;
+            try{
+                json =JSON.parse(this.responseText);
+                
+            }catch{
+                window.alert('Invalid JSON');
+            }
+            if (Object.keys(json['sources']).length != 0) {
+                source = document.getElementById("source");
+                source.innerHTML = "";
+                var option1 = document.createElement("option");
+                option1.value = "all";
+                option1.text = "all";
+                option1.id = "all";
+                source.appendChild(option1);
+                var i = 0;
+                for (sources of json['sources'] ) {
+                    if(i==9) {
+                        break;
+                    }
+                    var option = document.createElement("option");
+                    option.value = sources['name'];
+                    option.text = sources['name'];
+                    option.id = sources['id'];
+                    source.appendChild(option);
+                    i ++;
+                    
+                    
+                }
+                
+                
+            }
+        }
+        function formSubmit(){
+            var startDate = document.getElementById("from").value;
+            var endDate = document.getElementById("to").value;
+            if(startDate.length != 0 && endDate.length !=0)
+            {
+                if (endDate < startDate)
+                {
+                    alert("Incorrect time");
+                    return false;
+                }
+            }
+            var category = document.getElementById("category").value;
+            var sources = document.getElementById("source")
+            var source = sources[sources.selectedIndex].id;
+            var to = document.getElementById("to").value;
+            var from1 = document.getElementById("from").value;
+            var keyword = document.getElementById("keyword").value;
+            
+            var toDate =to.split('T')[0];
+            
+            var fromDate = from1.split('T')[0];
+        
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET",'getAllArticles?keyword='+keyword+'&toDate='+toDate+'&fromDate='+fromDate+'&source='+source+'&category='+category,true);
+            try {
+                xmlhttp.addEventListener('load', generateSearchCards, false);
+                xmlhttp.send(null);
+            } catch(err) {
+                alert("JSON File Not Found!");
+            }
+            return false;
+            
+        }
+        function generateSearchCards(){
+            try{
+                json1 = JSON.parse(this.responseText)
+            }
+            catch(e){
+                alert('Invalid JSON')
+            }
+            if(json1.includes('ErrorMessage')){
+                alert(json1[1]);
+            }else{
+                
+                if(json1.length ==0){
+                    document.getElementById('results').style.marginTop = "20px";
+                    document.getElementById('results').style.display = "block";
+                    document.getElementById('results').innerHTML = "No Results";
+                    document.getElementById('buttons').style.display = "none";
+                    pageIndex = "0";
+                }
+                else{
+                    var i =0;
+                    pageIndex = 0;
+                    var cards1 = document.createElement("div");
+                    var cards = document.createElement("div");
+                    document.getElementById('results').innerHTML = "";
+                    for (article of json1 ){
+                        if(i<5){
+                            pageIndex ++;
+                            var link = document.createElement("div");
+                            var card = document.createElement("div");
+                            card.style.border = "solid thin darkgray";
+                            card.style.transistion = "0.3s";
+                            
+                            card.style.borderRadius = "5px";
+                            card.addEventListener("mouseover", hover,false);
+                            card.addEventListener("mouseout", over,false);
+                            
+                            var image = document.createElement("img");
+                            image.setAttribute("src",article['urlToImage']);
+                            image.setAttribute("height","70px");
+                            image.setAttribute("width","70px");
+                            
+                            image.style.width = "70px";
+                            image.style.height = "70px";
+                            image.style.padding = "10px";
+                            card.appendChild(image);
+                            
+                            var mainData = document.createElement("div");
+                            var data = document.createElement("div");
+                            data.innerHTML =article['title'] ;
+                            data.style.fontWeight = "bold";
+                            data.style.fontSize = "14px";
+                            data.style.padding = "0px";
+                            data.style.margin = "0px";
+                            
+                            
+                            var data2 = document.createElement("div");
+                            data2.style.fontSize = "12px";
+                            flag = false;
+                            if (article['description'].length > 95) {
+                                mainString = article['description'].substring(0,96);
+                                if (mainString[95] == " "){
+                                    data2.innerHTML = mainString.substring(0,95)+"...";
+                                }
+                                else {
+                                    for (var j=mainString.length;j>0;j--) {
+                                        if(mainString[j] == " " && flag == false) {
+                                            
+                                            data2.innerHTML = mainString.substring(0,j)+"...";
+                                            flag = true;
+                                            
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                data2.innerHTML = article['description'];
+                            }
+                            data2.setAttribute("id","data2");
+                            
+                            data2.style.margin = "0px";
+                            data2.style.padding = "0px";
+                            data2.style.display = "block";
+                            data2.style.width = "510px";
+                            data2.setAttribute("id","data2");
+                            
+                            
+                            
+                            var data1 = document.createElement("div");
+                            data1.style.fontSize = "12px";
+                            
+                            var year = article['publishedAt'].substring(0, 4);
+                            var month = article['publishedAt'].substring(5, 7);
+                            var day = article['publishedAt'].substring(8, 10);
+                            
+                            displayDate = month + '/' + day + '/' + year;
+                            data1.innerHTML ="<b> Author : </b> "+ article['author']+"<br><b> Source: </b> "+ article['source'] ['name'] +"<br><b> Date: </b>"+displayDate +"<br>"+ article['description']+"<br><a href ="+article['url']+ " target = '_blank'>See Original Post</a>";
+                            
+                            
+                            data1.style.marginBottom = "10px";
+                            data1.style.padding = "0px";
+                            data1.style.width = "510px";
+                            data1.style.height = "100px";
+                            data1.style.display = "none";
+                            data1.setAttribute("id","data1");
+                            
+                            var divIcon =document.createElement("div");
+                            var clearIcon = document.createElement("i");
+                            clearIcon.setAttribute("class","material-icons md-18");
+                            clearIcon.innerHTML = "clear";
+                            divIcon.style.height = "18px";
+                            divIcon.style.width = "18px";
+                            divIcon.style.display = "none";
+                            divIcon.setAttribute("id","divIcon");
+                            divIcon.style.marginTop = "10px";
+                            divIcon.style.marginLeft = "22px";
+                            
+                            divIcon.appendChild(clearIcon);
+                            
+                            
+                            mainData.appendChild(data);
+                            mainData.appendChild(data2);
+                            mainData.appendChild(data1);
+                            mainData.style.width = "520px";
+                            mainData.style.paddingTop = "10px";
+                            mainData.style.paddingBottom = "10px";
+                            mainData.setAttribute("id","mainCardData");
+                            mainData.style.paddingLeft = "0px";
+                            
+                            card.appendChild(mainData);
+                            card.appendChild(divIcon);
+                            card.addEventListener("click",onClickCard);
+                            card.setAttribute("id","card");
+                            
+                            card.style.display = "flex";
+                            card.style.width = "650px";
+                            card.style.height = "90px";
+                            card.style.textAlign = "left";
+                            card.style.marginTop = "12px";
+                            
+                            link.appendChild(card);
+                            link.style.backgroundColor = '#eeeeee';
+                            link.style.width = "650px";
+                            
+                            cards.appendChild(link);
+                            i++;
+                        }
+                        
+                        else if ( i>4 && i<15){
+                            pageIndex ++;
+                            var link = document.createElement("div");
+                            var card = document.createElement("div");
+                            card.style.border = "solid thin darkgray";
+                            card.style.transistion = "0.3s";
+                            
+                            card.style.borderRadius = "5px";
+                            card.addEventListener("mouseover", hover,false);
+                            card.addEventListener("mouseout", over,false);
+                            
+                            var image = document.createElement("img");
+                            image.setAttribute("src",article['urlToImage']);
+                            image.setAttribute("height","70px");
+                            image.setAttribute("width","70px");
+                            
+                            image.style.width = "70px";
+                            image.style.height = "70px";
+                            image.style.padding = "10px";
+                            card.appendChild(image);
+                            
+                            var mainData = document.createElement("div");
+                            var data = document.createElement("div");
+                            data.innerHTML =article['title'] ;
+                            data.style.fontWeight = "bold";
+                            data.style.fontSize = "14px";
+                            data.style.padding = "0px";
+                            data.style.margin = "0px";
+                            
+                            
+                            var data2 = document.createElement("div");
+                            data2.style.fontSize = "12px";
+                            flag = false;
+                            if (article['description'].length > 95) {
+                                mainString = article['description'].substring(0,96);
+                                if (mainString[95] == " "){
+                                    data2.innerHTML = mainString.substring(0,95)+"...";
+                                }
+                                else {
+                                    for (var j=mainString.length;j>0;j--) {
+                                        if(mainString[j] == " " && flag == false) {
+                                            
+                                            data2.innerHTML = mainString.substring(0,j)+"...";
+                                            flag = true;
+                                            
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                data2.innerHTML = article['description'];
+                            }
+                            data2.setAttribute("id","data2");
+                            
+                            data2.style.margin = "0px";
+                            data2.style.padding = "0px";
+                            data2.style.display = "block";
+                            data2.style.overflow = "hidden";
+                            data2.style.whiteSpace = "nowrap";
+                            data2.style.width = "510px";
+                            data2.style.textOverflow = "ellipsis";
+                            data2.setAttribute("id","data2");
+                            
+                            
+                            
+                            var data1 = document.createElement("div");
+                            data1.style.fontSize = "12px";
+                            
+                            var year = article['publishedAt'].substring(0, 4);
+                            var month = article['publishedAt'].substring(5, 7);
+                            var day = article['publishedAt'].substring(8, 10);
+                            
+                            displayDate = month + '/' + day + '/' + year;
+                            data1.innerHTML ="<b> Author : </b> "+ article['author']+"<br><b> Source: </b> "+ article['source'] ['name'] +"<br><b> Date: </b>"+displayDate +"<br>"+ article['description']+"<br><a href ="+article['url']+ " target = '_blank'>See Original Post</a>";
+                            
+                            data1.style.marginBottom = "10px";
+                            data1.style.padding = "0px";
+                            data1.style.width = "510px";
+                            data1.style.height = "100px";
+                            data1.style.display = "none";
+                            data1.setAttribute("id","data1");
+                            
+                            var divIcon =document.createElement("div");
+                            var clearIcon = document.createElement("i");
+                            clearIcon.setAttribute("class","material-icons md-18");
+                            clearIcon.innerHTML = "clear";
+                            divIcon.style.height = "18px";
+                            divIcon.style.width = "18px";
+                            divIcon.style.display = "none";
+                            divIcon.setAttribute("id","divIcon");
+                            divIcon.style.marginTop = "10px";
+                            divIcon.style.marginLeft = "22px";
+                            
+                            divIcon.appendChild(clearIcon);
+                            
+                            
+                            mainData.appendChild(data);
+                            mainData.appendChild(data2);
+                            mainData.appendChild(data1);
+                            mainData.style.width = "520px";
+                            mainData.style.paddingTop = "10px";
+                            mainData.style.paddingBottom = "10px";
+                            mainData.setAttribute("id","mainCardData");
+                            mainData.style.paddingLeft = "0px";
+                            
+                            card.appendChild(mainData);
+                            card.appendChild(divIcon);
+                            card.addEventListener("click",onClickCard);
+                            card.setAttribute("id","card");
+                            
+                            card.style.display = "flex";
+                            card.style.width = "650px";
+                            card.style.height = "90px";
+                            card.style.textAlign = "left";
+                            card.style.marginTop = "12px";
+                            
+                            link.appendChild(card);
+                            link.style.backgroundColor = '#eeeeee';
+                            link.style.width = "650px";
+                            
+                            cards1.appendChild(link);
+                            cards1.setAttribute("id","cards");
+                            cards1.style.display = "none";
+                            
+                            
+                            i++;
+                            
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    cards.style.flex = "0 0 25em";
+                    document.getElementById('results').style.marginTop = "20px";
+                    document.getElementById('results').style.display = "block";
+                    
+                    document.getElementById('results').appendChild(cards);
+                    document.getElementById('results').appendChild(cards1);
+                    
+                    if(pageIndex > 5)
+                    {
+                        var buttonDiv = document.createElement("div");
+                        var btn = document.createElement("button");
+                        btn.innerHTML = "Show More";
+                        btn.style.fontSize ="13px";
+                        btn.style.backgroundColor = "#eeeeee";
+                        btn.style.border = "none";
+                        
+                        document.getElementById('buttons').style.display = "block";
+                        btn.addEventListener("click" , onClickShowMore) ;
+                        btn.addEventListener("mouseover",onButtonHover);
+                        btn.addEventListener("mouseout",onButtonOut);
+                        btn.style.width = "90px";
+                        btn.style.padding = "5px";
+                        document.getElementById('buttons').innerHTML = "" ;
+                        document.getElementById('buttons').appendChild(btn);
+                        
+                        
+                    }
+                    else {
+                        document.getElementById('buttons').style.display = "none";
+                        
+                    }}}
+        }
+        function onClickCard(){
+            var mainData = this.children[1];
+            
+            mainDataChildren = mainData.children;
+            mainData.style.setProperty("width",'510px');
+            this.style.setProperty("height",'170px');
+            
+            var divIcon = this.children[2];
+            mainDataChildren[2].style.setProperty("display" , "block");
+            mainDataChildren[1].style.setProperty("display" , "none");
+            divIcon.style.setProperty("display" ,"block");
+            divIcon.addEventListener('click', (event) => {
+                                     event.preventDefault();
+                                     event.stopPropagation();
+                                     onClickIcon(divIcon);
+                                     });
+                                     
+        }
+        function onClickIcon(divIcon){
+            parent = divIcon.parentNode;
+            var mainData = parent.children[1];
+            ;
+            mainDataChildren = mainData.children;
+            mainData.style.setProperty("width",'520px');
+            parent.style.setProperty("height",'90px');
+            var divIcon = parent.children[2];
+            mainDataChildren[2].style.setProperty("display" , "none");
+            mainDataChildren[1].style.setProperty("display" , "block");
+            divIcon.style.setProperty("display" ,"none");
+            
+            
+        }
+        function onClickShowMore(){
+            var i = 0;
+            var cards = document.getElementById("cards");
+            cards.style.display= "block";
+            
+            var buttonDiv = document.createElement("div");
+            var btn = document.createElement("button");
+            btn.innerHTML = "Show Less";
+            document.getElementById('buttons').style.display = "block";
+            
+            btn.style.fontSize ="13px";
+            btn.style.backgroundColor = "#eeeeee";
+            btn.style.border = "none";
+            btn.addEventListener("mouseover",onButtonHover);
+            btn.addEventListener("mouseout",onButtonOut);
+            btn.style.width = "90px";
+            btn.style.padding = "5px";
+            
+            btn.addEventListener("click" , onClickShowLess) ;
+            document.getElementById('buttons').innerHTML = "" ;
+            document.getElementById('buttons').appendChild(btn);
+            
+            
+        }
+        function onClickShowLess(){
+            var cards = document.getElementById("cards");
+            
+            cards.style.display= "none";
+            
+            if(pageIndex > 5)
+            {
+                var buttonDiv = document.createElement("div");
+                var btn = document.createElement("button");
+                btn.innerHTML = "Show More";
+                btn.style.fontSize ="13px";
+                btn.style.backgroundColor = "#eeeeee";
+                btn.style.border = "none";
+                
+                document.getElementById('buttons').style.display = "block";
+                btn.addEventListener("click" , onClickShowMore) ;
+                btn.addEventListener("mouseover",onButtonHover);
+                btn.addEventListener("mouseout",onButtonOut);
+                btn.style.width = "90px";
+                btn.style.padding = "5px";
+                document.getElementById('buttons').innerHTML = "" ;
+                document.getElementById('buttons').appendChild(btn);
+                
+                
+            }
+            else {
+                document.getElementById('buttons').style.display = "none";
+                
+            }
+        }
+        function clear1() {
+            date = new Date();
+            var yesterday = date - 1000 * 60 * 60 * 24 * 7;
+            var dd=date.getDate();
+            var mm=date.getMonth()+1;
+            var yy=date.getFullYear();
+            var newdate= mm+"/"+dd+"/"+yy;
+            yesterday = new Date(yesterday);
+            document.getElementById("from").valueAsDate =new Date(yesterday);
+            document.getElementById("to").valueAsDate =new Date (newdate);
+            document.getElementById("keyword").value = "";
+            document.getElementById("category").selectedIndex = "0";
+            document.getElementById("source").selectedIndex = "0";
+            document.getElementById('results').innerHTML = "";
+            document.getElementById('buttons').innerHTML = "";
+            json1 = [];
+            
+        }
+        function onButtonHover(){
+            this.style.backgroundColor = "#00b100 ";
+            this.style.color = "white";
+        }
+        function onButtonOut(){
+            this.style.backgroundColor = '#eeeeee';
+            this.style.color = "black";
+        }
+        </script>
+</head>
+<body >
+    <br>
+    <div class = "main1">
+        
+        <div class = "mainButton">
+            <div class = "GoogleNews" id="GoogleNews1" onclick = "disableForm('searchForm1','GoogleNews1','search1')" > Google News </div>
+            <div id="search1" class="search"   onclick="visibleForm('searchForm1','GoogleNews1','search1')">Search</div>
+        </div>
+        <div class = "main" style = "max-width :100%;">
+            <div class = "searchArea">
+                <center>
+                    <div class = "searchForm" id="searchForm1" style = "display:none;">
+                        
+                        <form  onsubmit="return formSubmit()" >
+                            <label for="keyword">Keyword  <span  style="color:red;margin-right: 10px;"> *</span></label>
+                            <input type="text" id="keyword" name="keyword" required oninput = "keyword1()"  style = "height:20px;width:200px;" autofocus = "true">
+                                
+                                <label for="from" style = "margin-left: 10px;">From <span  style="color:red;margin-right: 10px;"> *</span></label>
+                                <input type="DATE" id="from" name="from" format="MM/DD/YYYY"  required  style = "height:25px;">
+                                    
+                                    <label for="to" style = "margin-left: 10px;">To <span  style="color:red;margin-right: 10px;"> *</span> </label>
+                                    <input type="date" id="to" name="to"   required style = "height:25px;">
+                                        
+                                        <br>
+                                        <br>
+                                        <label for="category" style = "margin-right: 10px;">Category</label>
+                                        
+                                        <select id="category" style ="margin-right: 10px;" onChange = "getSources()">
+                                            <option value="all">all</option>
+                                            <option value="business">business</option>
+                                            <option value="entertainment">entertainment</option>
+                                            <option value="general">general</option>
+                                            <option value="health">health</option>
+                                            <option value="science">science</option>
+                                            <option value="sports">sports</option>
+                                            <option value="technology">technology</option>
+                                        </select>
+                                        <label for="source">Source</label>
+                                        <select id="source" style = "margin-left: 10px;">
+                                            
+                                        </select>
+                                        <br>
+                                        <br>
+                                        <input type="submit" class="submit"  value="Search"  />
+                                    <input type="button" class ="clear1" value="Clear" onClick="clear1()" />                                        </form>
+                        
+                    </div>
+                    <div id = "results" style = "display:none;">
+                    </div>
+                    <br>
+                    <div id = "buttons" style = "display:none;">
+                    </div>
+                    <br>
+                    <br>
+                </center>
+            </div>
+            <div class = "news">
+                <div id = "first" style ="display : flex;width = '100%';" >
+                    <div id = "topHeadlines">
+                        
+                    </div>
+                    <div id = "wordCloud" style = "float: right;background-color : whitesmoke; margin-left : 35px;"> </div>
+                </div>
+                <br>
+                <br>
+                <center>
+                    <div id = "CNN" style = "display:none;">
+                    </div>
+                    <br>
+                    
+                    <br>
+                    <div id = "Fox"  style = "display:none;">
+                    </div>
+                    <br>
+                    <br>
+                </center>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
